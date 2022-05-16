@@ -1,0 +1,217 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <a class="navbar-brand" style="color:white;">Campaign manager</a>
+  
+  <div class="collapse navbar-collapse" id="navbarColor02">
+     
+  </div>
+</nav>
+<div class="container" id="main-container">
+   
+      
+      <a href="#" (click)="onOpenModal(null, 'add')" class="btn btn-primary tooltips" data-placement="top" data-toggle="tooltip" data-original-title="Edit">Add new campaign</a>
+   
+    <div class="row">
+        <div *ngFor="let campaign of campaigns" class="col-md-6 col-xl-3">
+            <div class="card m-b-30">
+                
+                <ul class="list-group list-group-flush">
+                  <li class="list-group-item">Name: {{campaign.name}}</li>
+                    <li class="list-group-item">Bid amount: {{campaign.bid_amount}}</li>
+                    <li class="list-group-item">Campaign fund: {{campaign.campaign_fund}}</li>
+                    <li class="list-group-item">Status: {{campaign.status}}</li>
+                    <li class="list-group-item">Town: {{campaign.town}}</li>
+                    <li class="list-group-item">Radius: {{campaign.radius}}</li>
+                </ul>
+                <div class="card-body">
+                    <div class="float-right btn-group btn-group-sm">
+                        <a href="#" (click)="onOpenModal(campaign, 'edit')" class="btn btn-primary tooltips" data-placement="top" data-toggle="tooltip" data-original-title="Edit"><i class="fa fa-pencil"></i> </a>
+                        <a href="#" (click)="onOpenModal(campaign, 'delete')" class="btn btn-secondary tooltips" data-placement="top" data-toggle="tooltip" data-original-title="Delete"><i class="fa fa-times"></i></a>
+                    </div>
+                </div>
+            </div>
+          </div>
+    </div>
+</div>
+
+
+<!-- Add Campaign Modal -->
+<div class="modal fade" id="addCampaignModal" tabindex="-1" role="dialog" aria-labelledby="addCampaignModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+       <div class="modal-header">
+          <h5 class="modal-title" id="addCampaignModalLabel">Add campaign</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+          </button>
+       </div>
+       <div class="modal-body">
+          <form #addForm="ngForm" (ngSubmit)="onAddCampaign(addForm)">
+          <div class="form-group">
+             <label for="name">Name</label>
+             <input type="text" ngModel name="name" class="form-control" id="name" placeholder="Name" required>
+          </div>
+          <div class="form-group">
+            <label for="name">Bid amount</label>
+            <input type="text" ngModel name="bid_amount" class="form-control" id="bid_amount" placeholder="Bid amount" required>
+         </div>
+         <div class="form-group">
+          <label for="name">Campaign fund</label>
+          <input type="text" ngModel name="campaign_fund" class="form-control" id="campaign_fund" placeholder="Campaign fund" required>
+       </div>
+
+       <div class="form-group">
+         <label for="town">
+            Status
+         </label>
+      <select ngModel name="status" id="status" name="status"  class="form-control">
+         <option *ngFor="let status of available_status" [value]="status">
+            {{status}}
+         </option>
+         
+       </select>
+      </div>
+
+      <div class="form-group">
+         <label for="town">
+            Town
+         </label>
+      <select ngModel name="town" id="town" name="town"  class="form-control">
+         <option *ngFor="let town of towns" [value]="town" class="form-control">
+            {{town}}
+         </option>
+       </select>
+      </div>
+      
+      <div class="form-group">
+         <label for="keywords">
+            Keywords
+         </label>
+      <mat-form-field class="example-chip-list" appearance="fill">
+         <mat-chip-list #chipList aria-label="Keyword selection">
+           <mat-chip
+             *ngFor="let keyword of keywords"
+             (removed)="remove(keyword)">
+             {{keyword}}
+             <button matChipRemove>
+               <mat-icon>cancel</mat-icon>
+             </button>
+           </mat-chip>
+           <input
+             placeholder="New keyword..."
+             #fruitInput
+             [formControl]="keywordCtrl"
+             [matAutocomplete]="auto"
+             [matChipInputFor]="chipList"
+             [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+             (matChipInputTokenEnd)="add($event)">
+         </mat-chip-list>
+         <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete" searchText="" (optionSelected)="selected($event)">
+           
+            <mat-option *ngFor="let keyword of filteredKeywords | async" [value]="keyword">
+             {{keyword}}
+           </mat-option>
+         </mat-autocomplete>
+       </mat-form-field>
+      </div>
+      
+      <div class="form-group">
+        <label for="name">Radius</label>
+        <input type="text" ngModel name="radius" class="form-control" id="radius" placeholder="Radius" required>
+      </div>
+          <div class="modal-footer">
+             <button type="button" id="add-campaign-form" class="btn btn-secondary" data-dismiss="modal">Close</button>
+             <button [disabled]="addForm.invalid" type="submit" class="btn btn-primary" >Save changes</button>
+          </div>
+          </form>
+       </div>
+    </div>
+  </div>
+  </div>
+
+  <!-- Edit Modal -->
+<div class="modal fade" id="editCampaignModal" tabindex="-1" role="dialog" aria-labelledby="campaignEditModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+     <div class="modal-content">
+        <div class="modal-header">
+           <h5 class="modal-title" id="updateEmployeeModalLabel">Edit campaign</h5>
+           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+           <span aria-hidden="true">&times;</span>
+           </button>
+        </div>
+        <div class="modal-body">
+           <form #editForm="ngForm">
+              <div class="form-group">
+                 <label for="name">Name</label>
+                 <input type="text" ngModel="{{editCampaign?.name}}" name="name" class="form-control" id="name" aria-describedby="emailHelp" placeholder="Name">
+              </div>
+              <input type="hidden" ngModel="{{editCampaign?.id}}" name="id" class="form-control" id="id" placeholder="Email">
+              
+              <div class="form-group">
+                 <label for="phone">Bid amount</label>
+                 <input type="number" ngModel="{{editCampaign?.bid_amount}}" name="bid_amount" class="form-control" id="bid_amount" placeholder="Bid amount">
+              </div>
+
+              <div class="form-group">
+                 <label for="phone">Campaign fund</label>
+                 <input type="number" ngModel="{{editCampaign?.campaign_fund}}" name="campaign_fund" class="form-control" id="campaign_fund" placeholder="Campaign fund">
+              </div>
+      
+              <div class="form-group">
+               <label for="status">
+                  Status
+               </label>
+            <select ngModel="{{editCampaign?.status}}" ngModel name="status" id="status" name="status"  class="form-control">
+               <option  *ngFor="let status of available_status" [value]="status">
+                  {{status}}
+               </option> 
+             </select>
+            </div>
+
+
+            <div >
+               <label for="town">
+                  Town
+               </label>
+            <select ngModel="{{editCampaign?.town}}" ngModel name="town" id="{{editCampaign?.town}}" name="town" class="form-control">
+               <option  *ngFor="let town of towns" [value]="town">
+                  {{town}}
+               </option>
+             </select>
+            </div>
+
+             
+             <div class="form-group">
+              <label for="phone">Radius</label>
+              <input type="text" ngModel="{{editCampaign?.radius}}" name="radius" class="form-control" id="radius" placeholder="Radius">
+            </div>
+             
+              <div class="modal-footer">
+                 <button type="button" id="" data-dismiss="modal" class="btn btn-secondary">Close</button>
+                 <button (click)="onUpdateCampaign(editForm.value)" data-dismiss="modal" class="btn btn-primary" >Save changes</button>
+              </div>
+           </form>
+        </div>
+     </div>
+  </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteCampaignModal" tabindex="-1" role="dialog" aria-labelledby="deleteModelLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+     <div class="modal-content">
+        <div class="modal-header">
+           <h5 class="modal-title" id="deleteModelLabel">Delete campaign</h5>
+           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+           <span aria-hidden="true">&times;</span>
+           </button>
+        </div>
+        <div class="modal-body">
+           <p>Are you sure you want to delete campaign {{deleteCampaign?.name}}?</p>
+           <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+              <button (click)="onDeleteCampaign(deleteCampaign.id)" class="btn btn-danger" data-dismiss="modal">Yes</button>
+           </div>
+        </div>
+     </div>
+  </div>
+</div>
